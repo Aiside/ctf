@@ -1,9 +1,13 @@
 # ctf
-ctf tools
+aiside crypto version 1.1 
 
-在这个仓库中存放的是我自己写的一些包括在ctf比赛中会遇到会去使用的脚本
+支持偏移位加密，栅栏密码，base系列，培根密码的手动选项破解
 
-包括现在上传的解密工具后续会更新如果您希望我做哪一方面的解密程序开发欢迎给我发送邮件提提意见，或是您觉得我的程序可以如何优化欢迎交流，谢谢
+Support offset encryption, fence password, base series, bacon password manual option cracking
+
+aiside crypto version 1.2
+在原有密码的基础上添加了全自动化破解帮助您更快获取明文
+On the basis of the original password, add a fully automated cracking to help you get plaintext faster
 
 
 In this warehouse are some scripts written by myself, including scripts that will be used in CTF competitions
