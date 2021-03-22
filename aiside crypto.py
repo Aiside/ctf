@@ -1,22 +1,19 @@
 #python3.9.1 
 #auther:aiside for HUC
 #base64\base32\base16、rot13、Caesar cipher、Fence code
-#version：1.0
-
+#version：1.2
 def help():
     language_choose=input('中文(please input zn) or ENGLISH(please input en)\n')
     if language_choose=="zn":
-        print("作者：Aiside\n请在菜单栏中选择您需要使用的模块的序列号，并根据程序提示输入，您将得到所需的一切\n\n第一项偏移加密，包含凯撒加密(偏移量为3)、rot13加密（偏移量为13），都属与偏移加密。\n\n第二项base16/32/64加密包含如你所见\n\n第三项FENCE code 是栅栏密码")
+        print("作者：Aiside\n输入您要破解的密文，程序将自动开始解码，目前支持base系列解密，偏移位密码解密，栅栏密码解密，维吉尼亚密码解密")
     elif language_choose=="en":
-        print("Auther:aiside\nPlease select the serial number of the module you need to use in the menu bar, and input it according to the program prompt, you will get everything you want\n\nThe first offset encryption, including Caesar encryption and rot13 encryption, belongs to offset encryption\n\nThe second base16 / 32 / 64 encryption contains as you can see\n\n")
-    else :
-        print("ERROR input")
-def Offset_encryption():
+        print("Auther:aiside\nEnter the ciphertext you want to crack, the program will automatically start decoding, currently support base series decryption, offset decryption, fence decryption, Virginia decryption\n\n")
+def Offset_encryption(cip):
     def crypto_main(cip,shift):
         crypto_rot13_lst=[] 
         cip=cip.replace(' ','')
         if len(cip)==0:
-            print("your input have some error please check")
+            print("error,can not decrypto!")
         else:
             shift=int(shift)
             crypto_rot13_lst=[]
@@ -43,60 +40,72 @@ def Offset_encryption():
         crypto_rot13_lst_join=("".join(crypto_rot13_lst))
         print ("the crypto bits ",shift,"\nThe decryption result is:")
         print (crypto_rot13_lst_join,'\n')
-    def nomal_crypto(cip):
-        shift=input('please enter the encryption bits\n')
-        crypto_main(cip,shift)
-        print("successed")
     def brute_force_crypto(cip):
         for shift in range (26):
             crypto_main(cip,shift)
         print ("successed")
 
-    print('hello,this is rot13 crypto/encryption\n')
-    choose=input('if you want brote force please input \'b\' , if you just want nomal crypto please input \'n\' ')
-    cip=input('please,input your ciphertext')
-    if choose=='b':
-        brute_force_crypto(cip)
-    if choose=='n':
-        nomal_crypto(cip)
 
-def base_crypto():#无爆破模块
+    brute_force_crypto(cip)
 
+def base_crypto(cip):
     import base64
-    i=0
-    print ("Hello,this is base64/32/16 crypto\n")
-    cip=input('please input your ciphertext\n')
-    if cip%4!=0:
-        print ("this ciphertext maybe not be base64 encrypto")
-    else:
-        while len(cip)==0:
-                cip=input('please input your ciphertext again\n')
-        type_num=input('please choose you want to do , like \'16\' or \'32\' or \'64\'\n')                
-        try:
-            while i!=1:
-                if type_num == "16":
-                    i=1
-                    crypto_16_continue=str(base64.b16decode(cip),"UTF-8")
-                    print("ctypto result:\n")
-                    print(crypto_16_continue)
-                elif type_num=="32":
-                    i=1
-                    crypto_32_continue=str(base64.b32decode(cip),"UTF-8")
-                    print("ctypto result:\n")
-                    print(crypto_32_continue)
-                elif type_num=="64":
-                    i=1
-                    crypto_64_continue=str(base64.b64decode(cip),"UTF-8")
-                    print("ctypto result:\n")
-                    print(crypto_64_continue)
-                else:
-                    print("please,try input crypto type again! like \'16\' or \'32\' or \'64\'")
-                    type_num=input()
-        except Exception as e:
-            print('ERROR:The data you entered is not of the selected encryption type\n',e)
+    while len(cip)==0:
+            cip=input('please input your ciphertext again\n')      
 
-def fence_code():
+    judge_type=0
+    for i in cip :
+        cup=i.isalpha()
+        cup_2=i.isdigit()
+        if cup!=1 and cup_2!=1:
+            judge_type=64
+            break
+        else :
+            for m in cip :
+                if ord(m) in range (97,123):
+                    judge_type=64
+                    break
+                else:
+                    continue
+            continue
+    if judge_type==0:
+        for i in cip :
+            if ord(i) in range(70,91):
+                judge_type=32
+                break
+            else :
+                continue
+    if judge_type==0 :
+        judge_type=16
+    i=0
+    try:
+        while i!=1:
+            if judge_type == 16:
+                i=1
+                crypto_16_continue=str(base64.b16decode(cip),"UTF-8")
+                print("ctypto result:\n")
+                print(crypto_16_continue)
+            elif judge_type==32:
+                i=1
+                crypto_32_continue=str(base64.b32decode(cip),"UTF-8")
+                print("ctypto result:\n")
+                print(crypto_32_continue)
+            elif judge_type==64:
+                i=1
+                crypto_64_continue=str(base64.b64decode(cip),"UTF-8")
+                print("ctypto result:\n")
+                print(crypto_64_continue)
+            else:
+                print("please,try input crypto type again! like \'16\' or \'32\' or \'64\'")
+                judge_type=input()
+    except Exception as e:
+        print('ERROR:The data you entered is not of the selected encryption type\n',e)
+            
+
+
+def fence_code(cip):
     import math
+
     def add_num(encrypted_str,fence_length):    
         str_len = len(encrypted_str)
         fence_count = math.ceil(str_len/ fence_length)  
@@ -114,15 +123,8 @@ def fence_code():
         result = encrypted_str + s
         return result
         
-    def decrypt_fence(encrypted_str,fence_length,choose):
+    def decrypt_fence(encrypted_str,fence_length):
         encrypted_str = add_num(encrypted_str,fence_length)
-        if fence_length>=len(encrypted_str) or fence_length<1:
-            if choose=="1":
-                print("The fence is too long or too small to decrypt")
-                return
-            if choose=="2":
-                print("crypto finish")
-                return
         fence_count = math.ceil(len(encrypted_str)/fence_length)
         elen=len(encrypted_str)
         result = {x: '' for x in range(fence_count)}
@@ -134,29 +136,19 @@ def fence_code():
             d += result[i]
         d = d.replace("*", '')
         print(f'your :{fence_length}，result：{d}')  
-    def main(choose):
-        if choose =='1'or choose == '2':
-            if choose =='1':
-                encrypted_str=input ('please,input your encryhtertext\n')
-                fence_length=input('please,input the crypto bits\n')
-                decrypt_fence(encrypted_str,fence_length,choose)
-            elif choose == '2':
-                encrypted_str=input('please input your encryhertext\n')
-                fence_length=len(encrypted_str)+1
-                for i in range (1,fence_length):
-                    decrypt_fence(encrypted_str,i,choose)
-        else :
-            print("EEROR:please try again")
+    def main(cip):
+            encrypted_str=cip
+            fence_length=len(encrypted_str)+1
+            for i in range (1,fence_length):
+                decrypt_fence(encrypted_str,i)
 
-    print("please,choose what you want\n")
-    print("1、you know this message Encryption process（General decryption） or 2、you don't know (brute force)\n")
-    choose=int(input('please , input the number in menu\n'))
-    main(choose)
+
+    print("fence code was run!")
+    main(cip)
     
 
-def Bacon_cipher():
-    print("Hello,this is Bacon cipher")
-    cip=input('please input your ciphertext')
+def Bacon_cipher(cip):
+    print("bacon cipher running")
     lst_crypto_a=['AAAAA', 'AAAAB', 'AAABA', 'AAABB', 'AABAA', 'AABAB', 'AABBA', 'AABBB', 'ABAAA', 'ABAAB', 'ABABA', 'ABABB', 'ABBAA', 'ABBAB', 'ABBBA', 'ABBBB', 'BAAAA', 'BAAAB', 'BAABA', 'BAABB', 'BABAA', 'BABAB', 'BABBA', 'BABBB', 'BBAAA', 'BBAAB']
     lst_crypto_A=[ "AAAAA", "AAAAB", "AAABA", "AAABB", "AABAA", "AABAB", "AABBA","AABBB", "ABAAA", "ABAAA", "ABAAB", "ABABA", "ABABB", "ABBAA","ABBAB", "ABBBA", "ABBBB", "BAAAA", "BAAAB", "BAABA","BAABB", "BAABB", "BABAA", "BABAB", "BABBA", "BABBB"]
     lst_crypto_1=['A', 'B', 'C', 'D', 'E', 'F', 'G','H', 'I', 'J', 'K', 'L', 'M', 'N','O', 'P', 'Q', 'R', 'S', 'T','U', 'V', 'W', 'X', 'Y', 'Z']
@@ -196,31 +188,82 @@ def Bacon_cipher():
                 else :
                     print("ERROR : This TEXT maybe is not isn't encrypted like this")
 
-#def Vigenere_Cipher():
- #   all_alpha=[]
-  #  for i in range (65,91):
-   #     all_alpha.append(chr(i))
-    #print(all_alpha)
+def Vigenere_Cipher():
+    cip=input('please input the crypto text\n')
+    secret_key=input('please input the key\n')
+    if secret_key.isupper()==1:
+        next
+    else:
+        secret_key=secret_key.upper()
+    if cip.isupper()==1:
+        next
+    else:
+        cip=cip.upper()
+    secret_key_list=list(secret_key)
+    continue_text=[]
+    for i in range(9999):
+        for i in secret_key:
+            if len(cip)>len(secret_key_list):
+                secret_key_list.append(i)
+            else:
+                break
+        if len(cip)>len(secret_key_list):
+            next
+        else :
+            break
+
+    #print (secret_key_list)     #key补全
+
+    num_key=0
+    for i in cip:
+        cup_2=''.join(secret_key_list[num_key:(num_key+1)])
+        cup=ord(cup_2)
+        i=ord(i)-cup
+        if i<0 :
+            i=26+i
+        num_judge=0
+        crypto_continue=65
+        while num_judge!=i:
+            if crypto_continue==90:
+                crypto_continue+=1
+                num_judge=num_judge+1
+            else:
+                crypto_continue+=1
+                num_judge+=1
+        continue_text.append(chr(crypto_continue))
+        num_key=num_key+1
+    continue_text_join="".join(continue_text)
+    print('decreypto succsses')
+    print('decrypto result:\n')
+    print(continue_text_join)
+
+
+#def 
 
 ##########################################################################################功能调用模块
 def main(command):
-    if command==49:
-        Offset_encryption()
-    elif command==50:
-        base_crypto()
-    elif command==51:
-        fence_code()
-    elif command==52: 
-        Bacon_cipher()
-#    elif comande==53:
- #       offset_encryption()
-  #      base_crypto()
-   #     fence_code()
-    #    Bacon_cipher
-    elif command==104:
+    if command==104:
         help()
-    else:
-        print("ERROR input")
+    elif command==86 or command==118:
+        Vigenere_Cipher(cip)
+    elif command ==65 or command==97:
+        cip=input('please input the cip\n请输入密文')
+        print("\n")
+        print("Offset_encryption will run \n\n\n")
+        Offset_encryption(cip)
+        print("\n")
+        print("base_crypto will run \n\n\n")
+        base_crypto(cip)
+        print("\n")
+        print("fence_code will run \n\n\n")
+        fence_code(cip)
+        print("\n")
+        print("Bacon_cipher will run\n\n\n")
+        Bacon_cipher(cip)
+        
+
+    
+
 
 
 ##########################################################################################美化模块
@@ -236,10 +279,7 @@ def title_of():
     print("ccccccccccccc                      tt                         ff          \n")
 
 def menu_of():
-    print("menu")
-    print("*************************************************************************************************************\n")
-    print("1、Offset encryption            2、base16/32/64           3、Fence code         4、Bacon cipher      \n")
-    print("*************************************************************************************************************\n")
+    print("if you want use Vigenere Cipher please input \'v\'\n or input \'a\' for brute force ")
     print("please choose the servise if you want,or input h and \"enter\" to get help \n")
     command=ord(input('please input your choose\n'))
     main(command)
